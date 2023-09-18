@@ -95,7 +95,7 @@ jobs:
           load: true
           context: .
           file: ./${{ steps.short-version.outputs.result }}/${{ matrix.variant }}/Dockerfile
-          tags: node:${{ matrix.version }}-${{ matrix.variant }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/node:${{ matrix.version }}-${{ matrix.variant }}
 
       - name: Test for node version
         run: |
