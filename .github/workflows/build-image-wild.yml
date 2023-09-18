@@ -41,13 +41,13 @@ jobs:
     #     version: ${{ steps.matrix-gen.outputs.NODE_VERSION }}
     #     variant: ${{ steps.matrix-gen.outputs.BASE_IMAGE }}
 
-  docker:
-    uses: hero-intelligent/docker-node/.github/workflows/docker-build.yml@main
-    with:
-      node_version: ${{ steps.matrix-gen.outputs.NODE_VERSION }}
-      base_image: ${{ steps.matrix-gen.outputs.BASE_IMAGE }}
-      username: ${{ secrets.DOCKERHUB_USERNAME }}
-      password: ${{ secrets.DOCKERHUB_PASS }}
+
+      - uses: hero-intelligent/docker-node/.github/workflows/docker-build.yml@main
+        with:
+          node_version: ${{ steps.matrix-gen.outputs.NODE_VERSION }}
+          base_image: ${{ steps.matrix-gen.outputs.BASE_IMAGE }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASS }}
 
 
 
