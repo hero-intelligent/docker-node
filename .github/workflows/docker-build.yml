@@ -54,5 +54,5 @@ jobs:
           push: true
           context: .
           file: ./${{ matrix.version }}/${{ matrix.base }}/Dockerfile
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/node:${{ inputs.node_version }}-${{ inputs.base_image }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/node:${{ matrix.version }}-${{ matrix.base }}
 
