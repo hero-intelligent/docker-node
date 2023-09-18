@@ -21,10 +21,14 @@ on:
 
 jobs:
   build:
+    strategy:
+      matrix:
+        version: [18,20]
+        base: [alpine3.17,alpine3.18,bookworm-slim,bookworm,bullseye-slim,bullseye]
     uses: hero-intelligent/docker-node/.github/workflows/docker-build.yml@main
     with:
-      node_version: [18,20]
-      base_image: [alpine3.17,alpine3.18,bookworm-slim,bookworm,bullseye-slim,bullseye]
+      node_version: ${{ matrix.version }}
+      base_image: ${{ matrix.base }}
       username: ${{ secrets.DOCKERHUB_USERNAME }}
       password: ${{ secrets.DOCKERHUB_PASS }}
 
