@@ -21,33 +21,12 @@ on:
 
 jobs:
   build:
-    name: generate-matrix
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Generate matrix
-        id: matrix-gen
-        run: |
-          echo "NODE_VERSION=$(ls | grep [0-9])" >> $GITHUB_OUTPUT
-          echo "NODE_VERSION=$(ls | grep [0-9])" >> $GITHUB_ENV
-          echo "BASE_IMAGE=$(ls $(ls ./ | grep [0-9]) | grep -v '^[0-9]' | grep -v '^$' | sort | uniq)" >> $GITHUB_OUTPUT
-          echo "BASE_IMAGE=$(ls $(ls ./ | grep [0-9]) | grep -v '^[0-9]' | grep -v '^$' | sort | uniq)" >> $GITHUB_ENV
-
-    # outputs:
-    #   matrix:
-    #     version: ${{ steps.matrix-gen.outputs.NODE_VERSION }}
-    #     variant: ${{ steps.matrix-gen.outputs.BASE_IMAGE }}
-
-
-      - uses: hero-intelligent/docker-node/.github/workflows/docker-build.yml@main
-        with:
-          node_version: ${{ steps.matrix-gen.outputs.NODE_VERSION }}
-          base_image: ${{ steps.matrix-gen.outputs.BASE_IMAGE }}
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASS }}
+    uses: hero-intelligent/docker-node/.github/workflows/docker-build.yml@main
+    with:
+      node_version: [18,20]
+      base_image: [alpine3.17,alpine3.18,bookworm-slim,bookworm,bullseye-slim,bullseye]
+      username: ${{ secrets.DOCKERHUB_USERNAME }}
+      password: ${{ secrets.DOCKERHUB_PASS }}
 
 
 
