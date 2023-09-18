@@ -1,0 +1,120 @@
+name: build-image-wild
+
+on:
+  schedule:
+    - cron:  '0 0,8,16 * * *'
+  push:
+    paths:
+      - "**/Dockerfile"
+      - "**/docker-entrypoint.sh"
+      - genMatrix.js
+      - ".github/workflows/build-test.yml"
+
+  pull_request:
+    paths:
+      - "**/Dockerfile"
+      - "**/docker-entrypoint.sh"
+      - genMatrix.js
+      - ".github/workflows/build-test.yml"
+
+  workflow_dispatch:
+
+jobs:
+  gen-matrix:
+    name: generate-matrix
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Calculate file differences
+        id: diff
+        uses: tj-actions/changed-files@v39
+        with:
+          json: true
+          escape_json: false
+
+      - name: Generate testing matrix
+        uses: actions/github-script@v6
+        id: generator
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const script = require(`${process.env.GITHUB_WORKSPACE}/genMatrix.js`)
+            return script(
+              ${{ steps.diff.outputs.added_files }},
+              ${{ steps.diff.outputs.modified_files }},
+              ${{ steps.diff.outputs.renamed_files }},
+            );
+
+      - name: examination
+        run: echo ${{ steps.generator.outputs.result }}
+
+    outputs:
+      matrix: ${{ steps.generator.outputs.result }}
+
+  # build:
+  #   # if: ${{ fromJson(needs.gen-matrix.outputs.matrix) }}
+  #   needs: gen-matrix
+  #   name: build
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 180
+  #   strategy:
+  #     fail-fast: false
+  #     # matrix: ${{ fromJson(needs.gen-matrix.outputs.matrix) }}
+
+  #   steps:
+  #     - name: Get short node version
+  #       uses: actions/github-script@v6
+  #       id: short-version
+  #       with:
+  #         result-encoding: string
+  #         script: return "${{ matrix.version }}".split('.')[0]
+
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+
+  #     - name: Set up QEMU
+  #       uses: docker/setup-qemu-action@v3
+  #       # id: buildx
+
+  #     - name: Set up Docker Buildx
+  #       uses: docker/setup-buildx-action@v3
+
+  #     - name: Login to Docker Hub
+  #       if: github.event_name != 'pull_request'
+  #       uses: docker/login-action@v3
+  #       with:
+  #         username: ${{ secrets.DOCKERHUB_USERNAME }}
+  #         password: ${{ secrets.DOCKERHUB_PASS }}
+
+  #     - name: Build image
+  #       uses: docker/build-push-action@v5
+  #       with:
+  #         builder: ${{ steps.buildx.outputs.name }}
+  #         platforms: linux/arm/v6,linux/arm/v7,linux/arm64,linux/amd64,linux/386,linux/ppc64le,s390x
+  #         push: true
+  #         load: true
+  #         context: .
+  #         file: ./${{ steps.short-version.outputs.result }}/${{ matrix.variant }}/Dockerfile
+  #         tags: ${{ secrets.DOCKERHUB_USERNAME }}/node:${{ matrix.version }}-${{ matrix.variant }}
+
+  #     - name: Test for node version
+  #       run: |
+  #         image_node_version=$(docker run --rm node:${{ matrix.version }}-${{ matrix.variant }} node --print "process.versions.node")
+  #         echo "Expected: \"${{ matrix.version }}\", Got: \"${image_node_version}\""
+  #         [ "${image_node_version}" == "${{ matrix.version }}" ]
+
+  #     - name: Verify entrypoint runs regular, non-executable files with node
+  #       run: |
+  #         tmp_file=$(mktemp)
+  #         echo 'console.log("success")' > "${tmp_file}"
+  #         output=$(docker run --rm -v "${tmp_file}:/app/index.js" node:${{ matrix.version }}-${{ matrix.variant }} app/index.js)
+  #         [ "${output}" = 'success' ]
+
+  #     - name: Test for npm
+  #       run: docker run --rm node:${{ matrix.version }}-${{ matrix.variant }} npm --version
+
+  #     - name: Test for yarn
+  #       run: docker run --rm node:${{ matrix.version }}-${{ matrix.variant }} yarn --version
