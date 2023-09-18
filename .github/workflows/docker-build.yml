@@ -24,7 +24,8 @@ jobs:
     strategy:
       matrix:
         version: [18,20]
-        base: [alpine3.17,alpine3.18,bookworm-slim,bookworm,bullseye-slim,bullseye]
+        base: [alpine3.17,alpine3.18]
+        # another: [bookworm-slim,bookworm,bullseye-slim,bullseye]
     runs-on: ubuntu-latest
     timeout-minutes: 180
 
