@@ -52,7 +52,7 @@ jobs:
       matrix: ${{ steps.generator.outputs.result }}
 
   build:
-    if: ${{ fromJson(needs.gen-matrix.outputs.matrix) }}
+    # if: ${{ fromJson(needs.gen-matrix.outputs.matrix) }}
     needs: gen-matrix
     name: build
     runs-on: ubuntu-latest
